@@ -1,0 +1,10 @@
+﻿Properties\AssemblyInfo.cs
+FanaticalLibraryPlugin.csproj
+extension.yaml
+icon.png
+packages.config
+FanaticalLibrary.cs
+FanaticalLibraryClient.cs
+FanaticalLibrarySettings.cs
+FanaticalLibrarySettingsView.xaml
+FanaticalLibrarySettingsView.xaml.cs
