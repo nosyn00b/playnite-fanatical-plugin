@@ -1,30 +1,44 @@
-﻿using Playnite.SDK;
-using Playnite.SDK.Data;
+﻿using FanaticalLibrary.Services;
+using Playnite;
+using Playnite.SDK;
+//using Playnite.Commands;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Media;
+using Playnite.SDK.Data;
+
+
+
+
+
 
 namespace FanaticalLibrary
 {
+
+
     public class FanaticalLibrarySettings : ObservableObject
     {
-        private string option1 = string.Empty;
-        private bool option2 = false;
         private bool optionThatWontBeSaved = false;
+        public int Version { get; set; }
+        //public bool ConnectAccount { get; set; } = false;
+        public bool ImportRedeemdGames { get; set; } = false;
 
-        public string Option1 { get => option1; set => SetValue(ref option1, value); }
-        public bool Option2 { get => option2; set => SetValue(ref option2, value); }
         // Playnite serializes settings object to a JSON object and saves it as text file.
         // If you want to exclude some property from being saved then use `JsonDontSerialize` ignore attribute.
         [DontSerialize]
         public bool OptionThatWontBeSaved { get => optionThatWontBeSaved; set => SetValue(ref optionThatWontBeSaved, value); }
     }
 
-    public class FanaticalLibrarySettingsViewModel : ObservableObject, ISettings
+    public class FanaticalLibrarySettingsViewModel : PluginSettingsViewModel<FanaticalLibrarySettings, FanaticalLibrary> //ObservableObject, ISettings
     {
-        private readonly FanaticalLibrary plugin;
+        /*private readonly FanaticalLibrary plugin;
         private FanaticalLibrarySettings editingClone { get; set; }
 
         private FanaticalLibrarySettings settings;
@@ -36,8 +50,37 @@ namespace FanaticalLibrary
                 settings = value;
                 OnPropertyChanged();
             }
+        }*/
+        public bool IsUserLoggedIn
+        {
+            get
+            {
+                return new FanaticalAccountClient(PlayniteApi, Plugin.TokensPath).GetIsUserLoggedIn();
+            }
         }
 
+        public RelayCommand<object> LoginCommand
+        {
+            get => new RelayCommand<object>((a) =>
+            {
+                Login();
+            });
+        }
+
+        public FanaticalLibrarySettingsViewModel(FanaticalLibrary library, IPlayniteAPI api) : base(library, api)
+        {
+            var savedSettings = LoadSavedSettings();
+            if (savedSettings != null)
+            {
+                savedSettings.Version = 1;
+                Settings = savedSettings;
+            }
+            else
+            {
+                Settings = new FanaticalLibrarySettings { Version = 1 };
+            }
+        }
+        /*
         public FanaticalLibrarySettingsViewModel(FanaticalLibrary plugin)
         {
             // Injecting your plugin instance is required for Save/Load method because Playnite saves data to a location based on what plugin requested the operation.
@@ -56,6 +99,7 @@ namespace FanaticalLibrary
                 Settings = new FanaticalLibrarySettings();
             }
         }
+        
 
         public void BeginEdit()
         {
@@ -85,5 +129,22 @@ namespace FanaticalLibrary
             errors = new List<string>();
             return true;
         }
+        */
+  
+        private void Login()
+        {
+            try
+            {
+                var clientApi = new FanaticalAccountClient(PlayniteApi, Plugin.TokensPath);
+                clientApi.Login();
+                OnPropertyChanged(nameof(IsUserLoggedIn));
+            }
+            catch (Exception e) when (!Debugger.IsAttached)
+            {
+                PlayniteApi.Dialogs.ShowErrorMessage(PlayniteApi.Resources.GetString("LOCNotLoggedInError"), "");
+                Logger.Error(e, "Failed to authenticate user.");
+            }
+        }
+
     }
 }

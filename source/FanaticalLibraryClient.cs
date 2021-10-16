@@ -9,7 +9,7 @@ namespace FanaticalLibrary
 {
     public class FanaticalLibraryClient : LibraryClient
     {
-        public override bool IsInstalled => true;
+        public override bool IsInstalled => false;
 
         public override void Open()
         {
