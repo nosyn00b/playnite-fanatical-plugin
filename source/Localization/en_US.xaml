@@ -1,0 +1,26 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <sys:String x:Key="LOCSettingsImportInstalledLabel">Import installed games</sys:String>
+    <sys:String x:Key="LOCSettingsImportUninstalledLabel">Import not installed games</sys:String>
+    <sys:String x:Key="LOCSettingsConnectAccount">Connect account</sys:String>
+    <sys:String x:Key="LOCLoginChecking">Checking authentication status…</sys:String>
+    <sys:String x:Key="LOCLoggedIn">User is authenticated</sys:String>
+    <sys:String x:Key="LOCNotLoggedIn">Requires authentication</sys:String>
+    <sys:String x:Key="LOCNotLoggedInError">Failed to authenticate user.</sys:String>
+    <sys:String x:Key="LOCAuthenticateLabel">Authenticate</sys:String>
+    <sys:String x:Key="LOCSettingsStartGameDirectly">Start games directly without running official client</sys:String>
+    <sys:String x:Key="LOCTroubleShootingAccountLink">Troubleshooting account sync issues</sys:String>
+    <sys:String x:Key="LOCTroubleShootingIssues">Troubleshooting issues</sys:String>
+    <sys:String x:Key="LOCSettingsImportLibraryLabel">Import all games</sys:String>
+    <sys:String x:Key="LOCPrivateAccount">Private Account</sys:String>
+    <sys:String x:Key="LOCPublicAccount">Public Account</sys:String>
+    <sys:String x:Key="LOCAPIKey">API Key</sys:String>
+    <!-- Fanatical-->
+    <sys:String x:Key="LOCImportAlsoRedeemed">Import even if redeeemed (not recommended)</sys:String>
+    <sys:String x:Key="LOCImportAlsoDLC">Import also DLCs</sys:String>
+    <sys:String x:Key="LOCImportAlsoAudio">Import also Audio Items</sys:String>
+    <sys:String x:Key="LOCImportAlsoBooks">Import also Books Items</sys:String>
+    <sys:String x:Key="LOCImportAlsoSoftware">Import also Software Items</sys:String>
+    <sys:String x:Key="LOCImportAlsoComics">Import also Comics Items</sys:String>
+    <sys:String x:Key="LOCImportAlsoElearning">Import also eLearning Items</sys:String>
+    <sys:String x:Key="LOCFollowingFlagsNote">The following flags work only on recent purchases:</sys:String>
+</ResourceDictionary>

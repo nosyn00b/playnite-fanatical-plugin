@@ -5,8 +5,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:pcon="clr-namespace:Playnite.Converters"
+             xmlns:pcmd="clr-namespace:Playnite.Commands"             
              mc:Ignorable="d"
-             d:DesignHeight="123.629" d:DesignWidth="400">
+             d:DesignHeight="311.401" d:DesignWidth="352">
 
     <UserControl.Resources>
         <pcon:NegateConverter x:Key="NegateConverter" />
@@ -22,7 +23,7 @@
             <CheckBox DockPanel.Dock="Top" Name="CheckFanaticalImportAlreadyRedeemed"
                       IsChecked="{Binding Settings.ImportRedeemdGames}"
                       Margin="0,10,0,0"
-                      Content="Import also already redeeemed keys (not recommended)"/>
+                      Content="{DynamicResource LOCImportAlsoRedeemed}"/>
 
             <StackPanel Orientation="Horizontal"
                         DockPanel.Dock="Top" Margin="0,15,5,5" HorizontalAlignment="Left">
@@ -39,19 +40,52 @@
                         <Style TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
                             <Style.Triggers>
                                 <Trigger Property="Tag" Value="{StaticResource True}">
-                                    <Setter Property="Text" Value="LOCLoggedIn" />
+                                    <Setter Property="Text" Value="{DynamicResource LOCLoggedIn}" />
                                 </Trigger>
                                 <Trigger Property="Tag" Value="{StaticResource False}">
-                                    <Setter Property="Text" Value="LOCNotLoggedIn" />
+                                    <Setter Property="Text" Value="{DynamicResource LOCNotLoggedIn}" />
                                 </Trigger>
                                 <Trigger Property="Tag" Value="{x:Null}">
-                                    <Setter Property="Text" Value="LOCLoginChecking" />
+                                    <Setter Property="Text" Value="{DynamicResource LOCLoginChecking}" />
                                 </Trigger>
                             </Style.Triggers>
                         </Style>
                     </TextBlock.Style>
                 </TextBlock>
             </StackPanel>
+            <TextBlock VerticalAlignment="Center" Margin="2,5,5,5" Text="{DynamicResource LOCFollowingFlagsNote}">
+            </TextBlock>
+            <CheckBox DockPanel.Dock="Top" Name="CheckFanaticalImportAlsoDLC"
+                      IsChecked="{Binding Settings.ImportAlsoDLC}"
+                      Margin="0,10,0,0"
+                      Content="{DynamicResource LOCImportAlsoDLC}"/>
+
+            <CheckBox DockPanel.Dock="Top" Name="CheckFanaticalImportAlsoBooks"
+                      IsChecked="{Binding Settings.ImportAlsoBooks}"
+                      Margin="0,10,0,0"
+                      Content="{DynamicResource LOCImportAlsoBooks}"/>
+
+            <CheckBox DockPanel.Dock="Top" Name="CheckFanaticalImportAlsoComics"
+                      IsChecked="{Binding Settings.ImportAlsoComics}"
+                      Margin="0,10,0,0"
+                      Content="{DynamicResource LOCImportAlsoComics}" Height="20"/>
+            <CheckBox x:Name="CheckFanaticalImportAlsoSoftware"
+                      IsChecked="{Binding Settings.ImportAlsoSoftware}"
+                      Margin="0,10,0,0"
+                      Content="{DynamicResource LOCImportAlsoSoftware}"/>
+            <CheckBox DockPanel.Dock="Top" Name="CheckFanaticalImportAlsoElearning"
+                      IsChecked="{Binding Settings.ImportAlsoElearning}"
+                      Margin="0,10,0,0"
+                      Content="{DynamicResource LOCImportAlsoElearning}"/>
+
         </StackPanel>
+
+        <TextBlock VerticalAlignment="Center" Margin="0,20,0,0">
+            <Hyperlink NavigateUri="https://github.com/nosyn00b/playnite-fanatical-plugin"
+                        Command="{x:Static pcmd:GlobalCommands.NavigateUrlCommand}"
+                        CommandParameter="{Binding NavigateUri, RelativeSource={RelativeSource Self}}">
+                <Run Text="{DynamicResource LOCTroubleShootingIssues}" />
+            </Hyperlink>
+        </TextBlock>
     </StackPanel>
 </UserControl>

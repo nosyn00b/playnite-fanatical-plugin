@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("FanaticalLibrary")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Fanatical Store library support plugin for Playnite")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("FanaticalLibrary")]
-[assembly: AssemblyCopyright("Copyright ©  2019")]
+[assembly: AssemblyCopyright("Copyright ©  2021 by Nosyn00b")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

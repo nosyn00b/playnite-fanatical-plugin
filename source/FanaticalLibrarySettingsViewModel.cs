@@ -1,7 +1,7 @@
 ﻿using FanaticalLibrary.Services;
 using Playnite;
 using Playnite.SDK;
-//using Playnite.Commands;
+using Playnite.Commands;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

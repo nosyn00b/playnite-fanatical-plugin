@@ -98,45 +98,11 @@ namespace FanaticalLibrary
             return assets;
         }
 
+
+        //Called by Playnite Client
         public override IEnumerable<GameMetadata> GetGames(LibraryGetGamesArgs args)
         {
             // Return list of user's games.
-            /*return new List<GameMetadata>()
-            {
-                new GameMetadata()
-                {
-                    Name = "Notepad",
-                    GameId = "notepad",
-                    GameActions = new List<GameAction>
-                    {
-                        new GameAction()
-                        {
-                            Type = GameActionType.File,
-                            Path = "notepad.exe",
-                            IsPlayAction = true
-                        }
-                    },
-                    IsInstalled = true,
-                    Icon = new MetadataFile(@"c:\Windows\notepad.exe")
-                },
-                new GameMetadata()
-                {
-                    Name = "Calculator",
-                    GameId = "calc",
-                    GameActions = new List<GameAction>
-                    {
-                        new GameAction()
-                        {
-                            Type = GameActionType.File,
-                            Path = "calc.exe",
-                            IsPlayAction = true
-                        }
-                    },
-                    IsInstalled = true,
-                    Icon = new MetadataFile(@"https://playnite.link/applogo.png"),
-                    BackgroundImage = new MetadataFile(@"https://playnite.link/applogo.png")
-                }
-            };*/
 
             var allGames = new List<GameMetadata>();
             Exception importError = null;
@@ -212,6 +178,15 @@ namespace FanaticalLibrary
             var newGame = new GameMetadata
             { 
                 Source = new MetadataNameProperty("Fanatical"),
+                /*GameActions = new List<GameAction>
+                    {
+                        new GameAction()
+                        {
+                            Type = GameActionType.URL,
+                            Path = "https://www.fanatical.com/en/orders/"+SourceGameMetadata.order_id,
+                            IsPlayAction = false
+                        }
+                    },*/
                 GameId = SourceGameMetadata._id,
                 Name = SourceGameMetadata.name,
                 Platforms = new HashSet<MetadataProperty> { new MetadataSpecProperty("pc_windows") },
@@ -222,23 +197,5 @@ namespace FanaticalLibrary
             return newGame;
         }
         
-        /*
-
-        public override ISettings GetSettings(bool firstRunSettings)
-        {
-            return settings;
-        }
-
-        public override UserControl GetSettingsView(bool firstRunSettings)
-        {
-            return new FanaticalLibrarySettingsView();
-        }
-        */
-        /*
-                public override LibraryMetadataProvider GetMetadataDownloader()
-                {
-                    return new IGDBLazyMetadataProvider(PlayniteApi);
-                }
-        */
     }
 }
