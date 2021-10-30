@@ -42,69 +42,95 @@ namespace FanaticalLibrary.Services
         private static readonly string loginUrl = "https://www.fanatical.com/en/";
         private static readonly string accountUrl = "https://www.fanatical.com/en/account";
         private static readonly string gamesUrl = "https://www.fanatical.com/api/user/keys";
+        private static bool oldPlayniteSdk = SdkVersions.SDKVersion <= new Version(6, 0, 0, 0);
 
-        private readonly string loginscript = @"console.info('External script launched');
-                                        function startAllThis(){
-                                            //window.alert('This is injected javascript from the GOG Galaxy embedded browser (home page)');
-                                            console.log('Embedded Automating Login script launched');
-
+        //This scripts waits for a Welcome Back dialog and only then returns control to Palynite when authentication is completed.
+        private readonly string waitforreallogin = @"console.info('Waiting For Login Token');
+                                        function startWaitingForLogin(){
+                                            //window.alert('This is injected javascript from the Playnite FanmaticalPlugin');
+                                            console.log('Waiting for login dialog to appear');
                                             //it seems user is not authenticated, so navigate so proceed simulating cliks to login dialog
-                                            var sideBarTargetNode = document.getElementById('navbar-side');
-                                            if (sideBarTargetNode != null)
-                                            {
-                                                //window.alert('Sidebarreference IS present');
-                                                console.log('Sidebarreference Element Was found');
-                                            } //Get reference to the sidebar
-
-                                            // CallBack function to call when sidebar elements change
+                                            var loginDialogTarget=null;
+                                            var loginDialogStart=false;
+                                            // CallBack function to call when some elements in DOM change
                                             var callbackElementChanged = function(mutationsList, observer){
                                                 //window.alert('DOMSubtreeModified!');
-                                                console.log('DOM element changed!');
-                                                completedLogin();
+                                                //console.log('DOM element changed!');
+                                                loginDialogTarget=document.getElementsByClassName('modal-dialog signup-modal login-pane')
+                                                if (loginDialogTarget!=null && loginDialogTarget.length>0){
+                                                    //window.alert('loginDialogTargetNode IS present');
+                                                    //console.log('loginDialogTargetNode Element Was found');
+                                                    loginDialogStart=true;
+                                                    checkForCompletedLogin();
+                                                }
+                                                else{
+                                                    if(loginDialogStart) {
+                                                        CefSharp.PostMessage(localStorage.getItem('bsauth'));
+                                                    };
+                                                    //window.alert('loginDialogTargetNode NOT still open, waiting for login');
+                                                    //console.log('loginDialogTargetNode NOT still open, waiting for login');
+                                                    //return;
+                                                }
                                             };
 
                                             // Observer Options (describe changes to monitor)
-                                            var config = { attributes: true, childList: true, subtree: true };
+                                            var config = { attributes: false, childList: true, subtree: true };
 
                                             // Monitoring instance binded to callbackfunction (still not armed)
                                             var observer = new MutationObserver(callbackElementChanged);
 
                                             //function to arm the observer on SidebarNode
-                                            function ArmSideBarChangeObservation()
+                                            function ArmLoginDialogObservation()
                                             {
                                                 // Inizio del monitoraggio del nodo target riguardo le mutazioni configurate
-                                                observer.observe(sideBarTargetNode, config);
+                                                observer.observe(document.getRootNode(), config);
                                             }
 
-                                            //window.alert('Navbarside has to be  operated to get to login dialog (div opening): here is the HTMLcontent of navbar-side: ' + sideBarTargetNode.innerText);
-                                            //consider the login completed only if userneme element is present in the sidebar
-                                            function completedLogin()
+                                            function checkForCompletedLogin()
                                             {
-                                                if (document.getElementsByClassName('logged-in-as').length > 0)
+                                                //Only consider success login dialog
+                                                if (loginDialogTarget.item(0) != null && loginDialogTarget.item(0).getElementsByClassName('auth-title').item(0).textContent=='Welcome back')
                                                 {
-                                                    observer.disconnect();
-                                                    //window.alert('Elemento di login trovato: '+ document.getElementsByClassName('logged-in-as')[0].textContent);
-                                                    console.log('Elemento di login trovato: ' + document.getElementsByClassName('logged-in-as')[0].textContent);
-                                                    //navigate to library writing cookies and to scrape game names from the page
-                                                    //window.alert(window.localStorage.getItem('bsauth'));
-                                                    window.location.href = 'https://www.fanatical.com/en/account';
+                                                    var bsauth=JSON.parse(window.localStorage.getItem('bsauth'));
+                                                    if (bsauth.authenticated){
+                                                        //authentication comes after some time.
+                                                        observer.disconnect();
+                                                        //window.alert(window.localStorage.getItem('bsauth'));
+                                                        //window.alert('Calling .net: '+localStorage.getItem('bsauth'));
+                                                        //console.log('Calling .net: '+localStorage.getItem('bsauth'));
+                                                        CefSharp.PostMessage(localStorage.getItem('bsauth'));
+                                                        //window.location.href = 'https://www.fanatical.com/en/account'; 
+                                                    }
+                                                    else{
+                                                        //window.alert('Still not authenticated');
+                                                        //console.log('Still not authenticated);
+                                                    }
                                                 }
                                             }
 
+                                            //start to track LoginDialogChanges
+                                            ArmLoginDialogObservation();
+                                        }
+                                        startWaitingForLogin();
+            ";
+
+        //This script waits opens Sign-in Dialog
+        private readonly string simpleloginscript = @"console.info('External script launched');
+                                        function openSignInDialog(){
                                             //window.alert('Going to login dialog....');
                                             console.log('Going to login dialog....');
-                                                // This to open side bar
-                                                document.getElementsByClassName('mobile-nav-button')[0].click();
+                                            // This to open side bar
+                                            document.getElementsByClassName('mobile-nav-button')[0].click();
                                             //This to open login dialog
                                             document.getElementsByClassName('sign-in-btn')[0].click();
                                             //start to track sidebar DOM changes
-                                            ArmSideBarChangeObservation();
                                         }
-                                        startAllThis();
+                                        openSignInDialog();
             ";
 
 
-        private readonly string loginscriptbackup = @"console.info('External script launched');
+        //This scripts waits for login and in that case navigates to user profile url.
+        private readonly string loginscript_oldSDKVersion = @"console.info('External script launched');
                                         function pollDOM () {
                                           const el = document.getElementById('navbar-side');
                                           if (el!=null) {
@@ -154,7 +180,7 @@ namespace FanaticalLibrary.Services
                                                     observer.disconnect();
                                                     //window.alert('Elemento di login trovato: '+ document.getElementsByClassName('logged-in-as')[0].textContent);
                                                     console.log('Elemento di login trovato: ' + document.getElementsByClassName('logged-in-as')[0].textContent);
-                                                    //navigate to library writing cookies and to scrape game names from the page
+                                                    //navigate to library writing cookies.
                                                     window.location.href = 'https://www.fanatical.com/en/account';
                                                 }
                                             }
@@ -170,8 +196,45 @@ namespace FanaticalLibrary.Services
                                         }
                                         pollDOM();
             ";
-
-
+        /*
+        private readonly string logoutscript = @"
+            if (window.localStorage.getItem('bsauth')!= null ){
+                    authJson=JSON.parse(window.localStorage.getItem('bsauth'));
+                    anonid=JSON.parse(window.localStorage.getItem('bsanonymous'));
+                    if (authJson.authenticated){
+                        let request = new XMLHttpRequest();
+                        request.open('DELETE', 'https://www.fanatical.com/api/auth/logout');
+                        request.setRequestHeader('accept','application/json');
+                        request.setRequestHeader('authorization', authJson.token);
+//                      request.setRequestHeader('anonid:', anonid.id);
+                        request.send();
+                    }
+            }
+            location.reload();
+            ";
+        */
+        private readonly string simplelogoutscript = @"
+            function logOff(){
+                //window.alert('Going to login dialog....');
+                console.log('Going to login dialog....');
+                    // This to open side bar
+                if(document.getElementsByClassName('side-bar-reveal').length==0){
+                    document.getElementsByClassName('mobile-nav-button')[0].click();
+                }
+                if (document.getElementsByClassName('logged-in-as').length==1){
+                    Array.from(document.getElementsByClassName('navbar-side-item side-dropdown nav-link')).filter(el=> el.innerText=='MY ACCOUNT')[0].click();
+                    Array.from(document.getElementsByClassName('navbar-side-item collapse-links nav-link nav-link')).filter(el => el.innerText=='SIGN OUT')[0].click();
+                    return true;
+                }
+                else{
+                    if(document.getElementsByClassName('side-bar-reveal').length==1){
+                        document.getElementsByClassName('mobile-nav-button')[0].click();
+                    }
+                    return false;
+                }
+            }
+            logOff();
+            ";
         private static HttpClientHandler handler = new HttpClientHandler()
         {
             AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate
@@ -187,78 +250,21 @@ namespace FanaticalLibrary.Services
 
         public void Login()
         {
-            //var loggedIn = false;
-            //var apiRedirectContent = string.Empty;
-            string authToken=null;
-            File.Delete(tokensPath);
+            File.Delete(tokensPath); //from now on User is not considered already authenticated/authorized
+            //FileSystem.DeleteFile(tokensPath);
 
-            authToken = AskForlogin().GetAwaiter().GetResult();
-
-            /*
-            //TODO get token managing login web browser windows
-            using (var view = api.WebViews.CreateView(580, 700))
-            {
-                //TODO 7navigation and authentication.
-                view.DeleteDomainCookies(".fanatical.com");
-                view.LoadingChanged += async (s, e) =>
-                {
-                    
-                    var address = view.GetCurrentAddress();
-                    if (view.CanExecuteJavascriptInMainFrame && !e.IsLoading)
-                    {
-                        if (address.StartsWith(loginUrl)  ) { 
-                            var res = view.EvaluateScriptAsync("document.getElementById('navbar-side');").GetAwaiter().GetResult();
-                            authToken = res.Result.ToString();
-                        }
-                        else { 
-
-                            authToken =  view.EvaluateScriptAsync("window.localStorage.getItem(\"bsauth\");").GetAwaiter().GetResult().ToString();
-                        }
-                    }
-  
-                    if (authToken != null)
-                    {
-                        loggedIn = true;
-                        view.Close();
-                        return;
-                    }
-
-                    //                    if (address.StartsWith(loginUrl))
-                    //                    {
-                    //                        apiRedirectContent = await view.GetPageTextAsync();
-                    //                        loggedIn = true;
-                    //                        view.Close();
-                    //                    }
-                    //
-                };
-
-                view.Navigate(loginUrl);
-                view.OpenDialog();
-
-            if (!loggedIn)
-            {
-                return;
-            }
-
-            FileSystem.DeleteFile(tokensPath);
-
-             //TODO Execute script to get auth token
-            authToken = view.EvaluateScriptAsync("window.localStorage.getItem(\"bsauth\");").Result.ToString();
-            }
-            */
+            //TODO use if async
+            //string authToken = AskForlogin().GetAwaiter().GetResult
+            string authToken = AskForlogin();
 
             if (string.IsNullOrEmpty(authToken))
             {
-                logger.Error("Failed to get login token for fanatical account.");
+                logger.Error("Failed to get authorization token for fanatical account.");
                 return;
             }
 
-            // make as auth token 
             try
             { 
-
-            //authToken = "{\"sentEmail\":false,\"authenticated\":true,\"email\":\"rvanzo1971 @gmail.com\",\"error\":null,\"challenge\":null,\"magicSuccess\":null,\"magicSummoned\":null,\"_id\":\"58d301b9dc0d8214008dca83\",\"role\":\"customer\",\"created\":\"2017 - 03 - 22T22: 59:05.252Z\",\"language\":{\"code\":\"en\",\"label\":\"English\",\"nativeLabel\":\"English\"},\"email_confirmed\":true,\"twoFactorEnabled\":false,\"email_newsletter\":true,\"steam\":{},\"epic\":{},\"wishlist_notifications\":true,\"cart_notifications\":true,\"review_reminders\":true,\"user_review_reminders\":true,\"date_last_email_redeem_confirm\":false,\"alreadyHasAccount\":false,\"billing\":{\"customerName\":null,\"address1\":null,\"address2\":null,\"locality\":null,\"administrativeArea\":null,\"postalCode\":null,\"countryCode\":null},\"token\":\"58d301b9dc0d8214008dca83.cca42250 - 05c5 - 4f39 - ae87 - 4b635c787a3d\"}";
-            //authToken = "{\"sentEmail\":false,\"authenticated\":true,\"email\":\"rvanzo1971 @gmail.com\",\"error\":null,\"challenge\":null,\"magicSuccess\":null,\"magicSummoned\":null,\"_id\":\"58d301b9dc0d8214008dca83\",\"role\":\"customer\",\"created\":\"2017 - 03 - 22T22: 59:05.252Z\",\"language\":\"en-EN\",\"email_confirmed\":true,\"twoFactorEnabled\":false,\"email_newsletter\":true,\"steam\":\"\",\"epic\":\"\",\"wishlist_notifications\":true,\"cart_notifications\":true,\"review_reminders\":true,\"user_review_reminders\":true,\"date_last_email_redeem_confirm\":false,\"alreadyHasAccount\":false,\"billing\":\"customerName\",\"token\":\"58d301b9dc0d8214008dca83.cca42250 - 05c5 - 4f39 - ae87 - 4b635c787a3d\"}";
 
                 FileSystem.CreateDirectory(Path.GetDirectoryName(tokensPath));
                 Encryption.EncryptToFile(
@@ -266,7 +272,6 @@ namespace FanaticalLibrary.Services
                     authToken,
                     Encoding.UTF8,
                     WindowsIdentity.GetCurrent().User.Value);
-//                loggedIn = true;
             }
 
             catch (Exception e)
@@ -277,95 +282,187 @@ namespace FanaticalLibrary.Services
         }
 
 
-        public async Task<string> AskForlogin()
+        // TODO       public async Task<string> AskForlogin()
+        public string AskForlogin()
         {
-
-            using (var webView = api.WebViews.CreateView(500,800))
+            using (var webView = api.WebViews.CreateView(500, 800))
             {
                 //var loadComplete = new AutoResetEvent(false);
-                var processingPage = false;
+                var processingLogin = false;
+                var processingAuth = false;
+                var processingMessage = false;
                 JavaScriptEvaluationResult res = null;
+                string token = "{ \"athenticated\" : false}";
+                webView.DeleteDomainCookies(".fanatical.com");
 
+                //only used with new Playnite SDK
+                webView.JavascriptMessageReceived += async (o, e) =>
+                {
+                    if (processingMessage)
+                    {
+                        return;
+                    }
+
+                    processingMessage = true;
+                    try
+                    {
+                        token = e.message;
+                        if (Serialization.FromJson<FanaticalToken>(e.message).authenticated)
+                        {
+                            logger.Info("Authorization acquired, closing browser...");
+                            webView.Close(); //this resturns from OpenDialog call!
+                        }
+                        else
+                        {
+                            logger.Info("Authorization not completed, closing browser...");
+                            webView.Close(); //this resturns from OpenDialog call!
+                        }
+                    }
+                    catch
+                    {
+                        logger.Warn("Error while parsing browser message");
+                    }
+                    finally
+                    {
+                        processingMessage = false;
+                    }
+
+                    return;
+
+                };
                 webView.LoadingChanged += async (_, e) =>
                 {
                     var address = webView.GetCurrentAddress();
                     if (address == loginUrl && !e.IsLoading)
                     {
-                        if (processingPage)
+                        if (processingLogin) //does not allow parallel same-event processing
                         {
                             return;
                         }
 
-                        processingPage = true;
+                        processingLogin = true;
                         var numberOfTries = 0;
                         while (numberOfTries < 6)
                         {
+                            numberOfTries++;
                             // Don't know how to reliable tell if the data are ready because they are laoded post page load
                             if (!webView.CanExecuteJavascriptInMainFrame)
                             {
-                                logger.Warn("Fanatical site not ready yet.");
+                                logger.Warn("Fanatical site not ready yet on try " + numberOfTries.ToString());
                                 await Task.Delay(1000);
                                 continue;
                             }
 
-                            //res = await webView.EvaluateScriptAsync("window.alert('ciao'+document.getElementById('navbar-side'));");//window.document.getElementById('navbar-side');
-                            res = await webView.EvaluateScriptAsync(loginscript);//window.document.getElementById('navbar-side');
+                            /* //TODO Remove
+                            if(numberOfTries ==0)
+                            {
+                                //rese auth status the firs time ia already authenitcated
+                                res = await webView.EvaluateScriptAsync("window.localStorage.setItem('bsauth', '{\"authenticated\":false}');");
+                                if (res.Success)
+                                {
+                                    logger.Warn("Authentication State was reset");
+                                }
 
-                            //res = await webView.EvaluateScriptAsync("function returnValue(){return 'Ciao';} returnValue()");//window.document.getElementById('navbar-side'); //function () { var data=document.getElementById('navbar-side'); 
-                            //res = await webView.EvaluateScriptAsync("function returnValue(){return window.localStorage.getItem('bsauth');} returnValue()");
-                            //res = await webView.EvaluateScriptAsync("window.localStorage.getItem('bsauth');");
-                            
+                            }
+                            else { //from now on every change to the page chech for authentication
+                                res = await webView.EvaluateScriptAsync("window.localStorage.getItem('bsauth');");//
+                                if (res.Success && res.Result!=null)
+                                {
+                                    if (Serialization.FromJson<FanaticalToken>(res.Result.ToString()).authenticated)
+                                    {
+                                        token = res.Result.ToString();
+                                        webView.Close(); //this resturn from OpenDialog call!
+                                        break; //return if  authenticated
+                                    }
+                                }
+                            }*/
+
+                            logger.Debug("Fanatical Site i Ready to run login script on try " + numberOfTries.ToString());
+                            res = await webView.EvaluateScriptAsync(simplelogoutscript); //log out if still logged-in
                             if (!res.Success)
                             {
-                                logger.Warn("LoginScript Failed when managing login dialog");
-//                                throw new JavascriptException("LoginScriptFailed");
+                                logger.Warn("LogOut Failed");
+                                    
+                            }
+                            else
+                            {
+                                if ((bool)res.Result)
+                                {
+                                    logger.Info("Logout not necessary (use not already logged-in)");
+                                }
+                                else
+                                {
+                                    logger.Info("User already loggged-in, logout done");
+
+                                }
+
                             }
 
-                            //loadComplete.Set();
-                            //webView.Close();
-                            break;
+
+                            //Executed only once if CanExecuteJavascriptInMainFrame is true
+                            if (oldPlayniteSdk)
+                            {
+                                res = await webView.EvaluateScriptAsync(loginscript_oldSDKVersion);
+                            }
+                            else
+                            {
+                                res = await webView.EvaluateScriptAsync(simpleloginscript);
+                                res = await webView.EvaluateScriptAsync(waitforreallogin);
+                            }
+
+                            if (!res.Success)
+                            {
+                                logger.Warn("LoginScript Failed to manage login dialog");
+                                //                                throw new JavascriptException("LoginScriptFailed");
+                            }
+                            break; //scripts successfully launched
                         }
-                        processingPage = false;
+                        logger.Info("LoginScript executed on event LoadingChanged after waiting ExecutingJavascript " + numberOfTries.ToString() + " times");
+                        //processingLogin = false;
+
                     }
 
-                    if (address == accountUrl && !e.IsLoading)
+                    //if old sdk then wait for redirect to user account before getting authentication.
+                    if (oldPlayniteSdk && address == accountUrl && !e.IsLoading)
                     {
-                        if (processingPage)
+                        if (processingAuth)  //does not allow parallel same-event processing 
                         {
                             return;
                         }
 
-                        processingPage = true;
+                        processingAuth = true;
                         var numberOfTries = 0;
                         while (numberOfTries < 3)
                         {
+                            numberOfTries++;
                             if (!webView.CanExecuteJavascriptInMainFrame)
                             {
-                                logger.Warn("Fanatical site not ready yet.");
+                                logger.Debug("Fanatical site not ready yet when getting to user profile URL on try " + numberOfTries.ToString());
+                                await Task.Delay(500);
                                 continue;
                             }
 
                             res = await webView.EvaluateScriptAsync("window.localStorage.getItem('bsauth');");
-
                             var strRes = (string)res.Result;
                             if (strRes.IsNullOrEmpty())
                             {
-                                numberOfTries++;
-                                await Task.Delay(1000);
+                                logger.Info("AuthScript had not success on try number " + numberOfTries.ToString());
+                                await Task.Delay(500);
                                 continue;
                             }
-
-                            //loadComplete.Set();
+                            token = strRes;
                             webView.Close();
                             break;
                         }
-                        processingPage = false;
+
+                        logger.Info("AuthScript executed on event LoadingChanged after waiting ExecutingJavascript " + numberOfTries.ToString() + " times");
+                        //processingAuth = false;
                     }
                 };
 
                 webView.Navigate(loginUrl);
                 webView.OpenDialog();
-                return (string)res.Result;
+                return token;//retruning token written by event handlers fired by cef sharp instance (string)res.Result;
             }
         }
 
@@ -451,19 +548,23 @@ namespace FanaticalLibrary.Services
         }
 
 
-        private String getToken()
+        private string getToken()
         {
             if (File.Exists(tokensPath))
             {
                 try
                 {
 
-                    var str = Encryption.DecryptFromFile(
+                    var jsonStr = Serialization.FromJson<FanaticalToken>(Encryption.DecryptFromFile(
                             tokensPath,
                             Encoding.UTF8,
-                            WindowsIdentity.GetCurrent().User.Value);
+                            WindowsIdentity.GetCurrent().User.Value));
 
-                    return Serialization.FromJson <FanaticalToken>(str).token.Replace(" ", string.Empty);
+                    if (jsonStr.authenticated)
+                    {
+                        return jsonStr.token.Replace(" ", string.Empty);
+                    }
+
                 }
                 catch (Exception e)
                 {

@@ -21,21 +21,8 @@ namespace FanaticalLibrary
 
         internal readonly string TokensPath;
 
-        /*private FanaticalLibrarySettingsViewModel settings { get; set; }
-        
-
-        private static readonly ILogger logger = LogManager.GetLogger();
-        public override Guid Id { get; } = Guid.Parse("ef17cc27-95d4-45e7-bd49-214ba2e5f4b2");
-
-        // Change to something more appropriate
-        public override string Name => "Fanatical Library";
-
-        // Implementing Client adds ability to open it via special menu in playnite.
-        public override LibraryClient Client { get; } = new FanaticalLibraryClient();
-        */
-
         public FanaticalLibrary(IPlayniteAPI api) : base(
-            "Fanatical Library",
+            "Fanatical",
             Guid.Parse("ef17cc27-95d4-45e7-bd49-214ba2e5f4b2"),
             new LibraryPluginProperties { CanShutdownClient = true, HasSettings = true },
             new FanaticalLibraryClient(),
@@ -47,17 +34,6 @@ namespace FanaticalLibrary
                 TokensPath = Path.Combine(GetPluginUserDataPath(), "tokens.json");
             }
         
-       /*
-        public FanaticalLibrary(IPlayniteAPI api) : base(api)
-        {
-            settings = new FanaticalLibrarySettingsViewModel(this);
-            Properties = new LibraryPluginProperties
-            {
-                HasSettings = true
-            };
-            TokensPath = Path.Combine(GetPluginUserDataPath(), "tokens.json");
-        }*/
-
         public string GetCachePath(string dirName)
         {
             return Path.Combine(GetPluginUserDataPath(), dirName);
@@ -113,10 +89,11 @@ namespace FanaticalLibrary
                 var libraryGames = GetLibraryItems();
                 Logger.Debug($"Found {libraryGames.Count} library Fantical items.");
                 var nogames = 0;
-           
+
+
                 foreach (var item in libraryGames)
                 {
-                    if (item.status == "fulfilled")
+                    if (item.status == "fulfilled" || SettingsViewModel.Settings.ImportRedeemdItems)
                     { //only unredeemd
                         switch (item.type)
                         {
@@ -127,15 +104,51 @@ namespace FanaticalLibrary
                             case "dlc":
                                 Logger.Debug("DLC found:" + item.name + ", status is [" + item.status + "]");
                                 nogames++;
+                                if (SettingsViewModel.Settings.ImportAlsoDLC) {
+                                    allGames.Add(fanaticalItemtoGame(item));
+                                }
                                 break;
                             case "book":
                                 Logger.Debug("Book found:" + item.name + ", status is [" + item.status + "]");
                                 nogames++;
+                                if (SettingsViewModel.Settings.ImportAlsoBooks)
+                                {
+                                    allGames.Add(fanaticalItemtoGame(item));
+                                }
                                 break;
                             case "audio":
                                 Logger.Debug("Audio found:" + item.name + ", status is [" + item.status + "]");
                                 nogames++;
+                                if (SettingsViewModel.Settings.ImportAlsoAudio)
+                                {
+                                    allGames.Add(fanaticalItemtoGame(item));
+                                }
                                 break;
+                            case "software":
+                                Logger.Debug("Software found:" + item.name + ", status is [" + item.status + "]");
+                                nogames++;
+                                if (SettingsViewModel.Settings.ImportAlsoSoftware)
+                                {
+                                    allGames.Add(fanaticalItemtoGame(item));
+                                }
+                                break;
+                            case "comic":
+                                Logger.Debug("Comic found:" + item.name + ", status is [" + item.status + "]");
+                                nogames++;
+                                if (SettingsViewModel.Settings.ImportAlsoComics)
+                                {
+                                    allGames.Add(fanaticalItemtoGame(item));
+                                }
+                                break;
+                            case "eleraning":
+                                Logger.Debug("Elearning found:" + item.name + ", status is [" + item.status + "]");
+                                nogames++;
+                                if (SettingsViewModel.Settings.ImportAlsoElearning)
+                                {
+                                    allGames.Add(fanaticalItemtoGame(item));
+                                }
+                                break;
+
                             default: //old games had not type and were games 
                                 allGames.Add(fanaticalItemtoGame(item));
                                 Logger.Debug("Undefined Type found:" + item.name + ", type is [" + item.type + "] status is [" + item.status + "]");

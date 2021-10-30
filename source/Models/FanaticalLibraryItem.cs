@@ -8,8 +8,8 @@
         public string name;
         public string type;
         public string display_type;
-        //public List<bool> drm;
-        //public List<bool> platforms;
+        //public List<bool> drm; //TODO
+        //public List<bool> platforms; //TODO
         public string purchased;
         public string status;
         //public List<string> order;
