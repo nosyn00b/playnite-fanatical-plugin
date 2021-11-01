@@ -41,8 +41,6 @@ namespace FanaticalLibrary
 
         internal List<FanaticalLibraryItem> GetLibraryItems()
         {
-            var cacheDir = GetCachePath("catalogcache");
-            var games = new List<FanaticalLibraryItem>();
             var accountApi = new FanaticalAccountClient(PlayniteApi, TokensPath);
             var assets = accountApi.GetLibraryItems();
             if (!assets?.Any() == true)
@@ -50,27 +48,6 @@ namespace FanaticalLibrary
                 Logger.Warn("Found no assets on Fanatical accounts.");
             }
 
-            //TODO Manage cacheing
-            /*
-            foreach (var gameAsset in assets) //assets.Where(a => a.@namespace != "ue")
-            {
-
-                var cacheFile = Paths.GetSafePathName($"{gameAsset._id}_{gameAsset.iid}.json");//gameAsset.@namespace_
-                cacheFile = Path.Combine(cacheDir, cacheFile);
-                //TODO filter key 
-                var newGame = new FanaticalLibraryItem
-                {
-                    Source = new MetadataNameProperty("Fanatical"),
-                    GameId = gameAsset.appName,
-                    Name = catalogItem.title.RemoveTrademarks(),
-                    Platforms = new HashSet<MetadataProperty> { new MetadataSpecProperty("pc_windows") }
-                };
-
-
-                games.Add(newGame);
-            }
-
-            return games;*/
             return assets;
         }
 

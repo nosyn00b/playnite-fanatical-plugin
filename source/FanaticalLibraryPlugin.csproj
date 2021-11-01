@@ -31,7 +31,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Playnite.SDK">
+    <Reference Include="Playnite.SDK, Version=6.0.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Playnite\source\PlayniteSDK\bin\Debug\Playnite.SDK.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />

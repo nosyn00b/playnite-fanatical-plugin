@@ -15,12 +15,19 @@
         //public List<string> order;
     }
 
+    public class FanaticalUserTraits
+    {
+        public string _id;
+        public string email;
+    }
+
+
     public class FanaticalToken
     {
-        //public bool sentEmail;
         public bool authenticated;
-        public string email;
+        //public string email;
         public string error;
+        //public bool sentEmail;
         //public string challenge;
         //public string magicSuccess;
         //public string magicSummoned;
