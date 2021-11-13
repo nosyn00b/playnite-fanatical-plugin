@@ -49,7 +49,7 @@ namespace FanaticalLibrary
         {
             get
             {
-                return new FanaticalAccountClient(PlayniteApi, Plugin.TokensPath).GetIsUserLoggedIn();
+                return new FanaticalAccountClient(PlayniteApi, Plugin.TokensPath).IsUserLoggedIn();
             }
         }
 

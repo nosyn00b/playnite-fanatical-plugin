@@ -21,12 +21,6 @@ using System.Reflection;
 
 namespace FanaticalLibrary.Services
 {
-    /*public class TokenException : Exception
-    {
-        public TokenException(string message) : base(message)
-        {
-        }
-    }*/
 
     public class JavascriptException : Exception
     {
@@ -40,9 +34,10 @@ namespace FanaticalLibrary.Services
         private ILogger logger = LogManager.GetLogger();
         private IPlayniteAPI api;
         private string tokensPath;
-        private FanaticalUserTraits userTraits;
+        private static FanaticalUserTraits UserTraits;
         private static bool newEventSDK;
-        private static readonly string loginUrl = "https://www.fanatical.com/en/";
+        public static readonly string loginUrl = "https://www.fanatical.com/en/";
+        public static readonly string orderUrl = "https://www.fanatical.com/en/orders";
         private static readonly string accountUrl = "https://www.fanatical.com/en/account";
         private static readonly string gamesUrl = "https://www.fanatical.com/api/user/keys";
         private static readonly string refreshUrl = "https://www.fanatical.com/api/user/refresh-auth";
@@ -189,6 +184,10 @@ namespace FanaticalLibrary.Services
                 logger.Error("Failed to get authorization token for fanatical account.");
                 return;
             }
+            else
+            {
+                logger.Info("Authorization successful for account "+ UserTraits.email);
+            }
 
             try
             { 
@@ -210,7 +209,7 @@ namespace FanaticalLibrary.Services
 
 
         //Using CEF events you can have a more clean exeperience/implementation
-        public string AskForlogin()
+        private string AskForlogin()
         {
             using (var webView = api.WebViews.CreateView(500, 800))
             {
@@ -323,7 +322,7 @@ namespace FanaticalLibrary.Services
             }
         }
 
-        public string AskForlogin_old()
+        private string AskForlogin_old()
         {
             using (var webView = api.WebViews.CreateView(500, 800))
             {
@@ -437,7 +436,7 @@ namespace FanaticalLibrary.Services
             }
         }
 
-        public bool GetIsUserLoggedIn()
+        public bool IsUserLoggedIn()
         {
             var token = getToken();
 
@@ -450,11 +449,11 @@ namespace FanaticalLibrary.Services
             try
             {
                 var jsonResponse = InvokeAuthenticatedRequest(refreshUrl).GetAwaiter().GetResult();
-                userTraits= Serialization.FromJson<FanaticalUserTraits>(jsonResponse);
+                UserTraits= Serialization.FromJson<FanaticalUserTraits>(jsonResponse);
             }
             catch (Exception e)
             {
-                logger.Error(e, "Failed to validation Fanatical authentication.");
+                logger.Error(e, "Failed to validate Fanatical authentication.");
                 return false;
             }
             return true;
@@ -462,7 +461,7 @@ namespace FanaticalLibrary.Services
 
         public List<FanaticalLibraryItem> GetLibraryItems()
         {
-            if (!GetIsUserLoggedIn())
+            if (!IsUserLoggedIn())
             {
                 throw new Exception("User is not authenticated.");
             }

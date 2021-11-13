@@ -9,7 +9,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 
@@ -26,8 +26,8 @@ namespace FanaticalLibrary
             Guid.Parse("ef17cc27-95d4-45e7-bd49-214ba2e5f4b2"),
             new LibraryPluginProperties { CanShutdownClient = true, HasSettings = true },
             new FanaticalLibraryClient(),
-            null,
-            (_) => new FanaticalLibrarySettingsView(),
+            Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Resources\fanaticalicon.png"),
+           (_) => new FanaticalLibrarySettingsView(),
             api)
             {
                 SettingsViewModel = new FanaticalLibrarySettingsViewModel(this, api);
@@ -162,27 +162,44 @@ namespace FanaticalLibrary
             return allGames;
         }
 
-        private GameMetadata fanaticalItemtoGame( FanaticalLibraryItem SourceGameMetadata)
+        private GameMetadata fanaticalItemtoGame(FanaticalLibraryItem SourceGameMetadata)
         {
+
+            //Currently it seems platforms is not so well supportd by Plugins 
+            //HashSet<MetadataProperty> Platforms = new HashSet<MetadataProperty>();
+            //if (SourceGameMetadata.platforms != null) {
+            //    foreach (KeyValuePair<string, bool> platform in SourceGameMetadata.platforms)
+            //    {
+            //        if (platform.Value)
+            //        {
+                        
+            //            Platforms.Add(new MetadataSpecProperty("pc_"+platform.Key));
+            //        }
+            //    }
+            //}
+            //else {
+            //    new MetadataSpecProperty("pc_windows"); //consider is a windows games if platform not present in game data
+            //}
+
 
             var newGame = new GameMetadata
             { 
                 Source = new MetadataNameProperty("Fanatical"),
-                /*GameActions = new List<GameAction>
+                GameActions = new List<GameAction>
                     {
                         new GameAction()
                         {
+                            Name = "Open Fanatical Order",
                             Type = GameActionType.URL,
-                            Path = "https://www.fanatical.com/en/orders/"+SourceGameMetadata.order_id,
+                            Path = FanaticalAccountClient.orderUrl+"/"+SourceGameMetadata.order["_id"],
                             IsPlayAction = false
                         }
-                    },*/
+                    },
                 GameId = SourceGameMetadata._id,
-                Name = SourceGameMetadata.name,
+                Name = StringExtensions.NormalizeGameName(SourceGameMetadata.name),
+                //Platforms = Platforms,
                 Platforms = new HashSet<MetadataProperty> { new MetadataSpecProperty("pc_windows") },
-                IsInstalled = false //,
-                //Icon = new MetadataFile(@"https://playnite.link/applogo.png"),
-                //BackgroundImage = new MetadataFile(@"https://playnite.link/applogo.png")
+                IsInstalled = false 
             };
             return newGame;
         }
