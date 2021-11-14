@@ -186,7 +186,7 @@ namespace FanaticalLibrary.Services
             }
             else
             {
-                logger.Info("Authorization successful for account "+ UserTraits.email);
+                logger.Info("Authorization successful");
             }
 
             try
@@ -198,8 +198,7 @@ namespace FanaticalLibrary.Services
                     authToken,
                     Encoding.UTF8,
                     WindowsIdentity.GetCurrent().User.Value);
-            }
-
+           }
             catch (Exception e)
             {
                 logger.Error(e, "Failed to write token.");
@@ -367,14 +366,12 @@ namespace FanaticalLibrary.Services
                             {
                                 if ((bool)res.Result)
                                 {
-                                    logger.Info("Logout not necessary (use not already logged-in)");
+                                    logger.Info("User already loggged-in, logout done");
                                 }
                                 else
                                 {
-                                    logger.Info("User already loggged-in, logout done");
-
+                                    logger.Info("Logout not necessary (user not already logged-in)");
                                 }
-
                             }
 
                             //Executed only once if CanExecuteJavascriptInMainFrame is true
@@ -436,6 +433,25 @@ namespace FanaticalLibrary.Services
             }
         }
 
+
+        private bool checkIfValidLogin() {
+            //Token validation (is not necessary)
+            try
+            {
+                var jsonResponse = InvokeAuthenticatedRequest(refreshUrl).GetAwaiter().GetResult();
+                UserTraits = Serialization.FromJson<FanaticalUserTraits>(jsonResponse);
+            }
+            catch (Exception e)
+            {
+                logger.Error(e, "Curent Fanatical authentication token is invalid.");
+                return false;
+            }
+
+            logger.Info("Current authentication token is valid.");
+            return true;
+        }
+
+
         public bool IsUserLoggedIn()
         {
             var token = getToken();
@@ -446,17 +462,7 @@ namespace FanaticalLibrary.Services
             }
 
             //Token validation (is not necessary)
-            try
-            {
-                var jsonResponse = InvokeAuthenticatedRequest(refreshUrl).GetAwaiter().GetResult();
-                UserTraits= Serialization.FromJson<FanaticalUserTraits>(jsonResponse);
-            }
-            catch (Exception e)
-            {
-                logger.Error(e, "Failed to validate Fanatical authentication.");
-                return false;
-            }
-            return true;
+            return checkIfValidLogin();
         }
 
         public List<FanaticalLibraryItem> GetLibraryItems()
@@ -493,7 +499,7 @@ namespace FanaticalLibrary.Services
             }
             catch (Exception e)
             {
-                logger.Error(e, "Failed to get games from web.");
+                logger.Error(e, "Failed to get data on protected connection.");
                 return null;
             }
 
