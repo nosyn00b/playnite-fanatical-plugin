@@ -16,12 +16,12 @@ This plugin was written to let you see in the Playnite UI all those owned-but-no
 ![Example of the resulting Playnite grid](Resources/Screenshot_2.png)
 
 - Experimentally
-You can also import the already redemed games, and non-games (Audio, Video...).
+You can also import the already redeemed games, and non-games (Audio, Video...).
 
 ![Example of the resulting Playnite grid](Resources/Screenshot_3.png)
 
 
-Due to the nature of Fanatical Store, this integration does not support tags, startig and installing games, "game time" and other amenities, it just lists owned games.
+Due to the nature of the Fanatical Store, this integration does not support tags, startig and installing games, "game time" and other amenities, it just lists owned games.
 
 Refreshing (adding) games happens as often as for the other Playnite libraries.
 
@@ -79,27 +79,26 @@ Normally, after the first successfully completed login, another authenticaton wi
 
 # Updating the game list
 
-To ask Playnite to get the list of all your owned and unredeemed games (or in any case all the games as filtered in you settings) you simply have to use the 
+To ask Playnite to get the list of all your owned and unredeemed games (or in any case all the games as filtered in you settings) you simply have to use the dedicated menu:
 
 ![Importing Fanatical Games](Resources/Screenshot_10.png)
 
 The list of games of each integrated library is reloaded any time you open Playnite, so possible new games will be added consequently. 
 
-Getting the list of games will be quite fast, but importing all their cover image and metadata will take its time, so Playnite will do that asynchronously (using the standard Metadata downloader).
+Note that getting the list of games will be quite fast, but importing all their cover image and metadata will take its time (Playnite will do that asynchronously using the standard Metadata downloader).
 
-If, for some reason, the metadata download is interrupted you can alwais restart that via the dedicated menu:
+If, for some reason, the metadata download is interrupted, you can always restart it via the dedicated menu:
 
 ![Updateing Metadata](Resources/Screenshot_11.png)
 
-
 # Troubleshooting
 
-- If,  for some reason, you close the sign in dialog, you are stucked with the opened embedded browser window. To close it simply navigate to on another page. You can also re-open the sign in dialog e retry.
+- If, for some reason, you close the sign in dialog, you are stucked with the opened embedded browser window. To close it simply navigate to on another page. You can also re-open the sign-in dialog and retry.
 
 # Issue reporting
 I wrote this plugin during my scarce free time (usally at night): no support is granted but you can try :)
 
-Along with your detailed problem description, you may need to attach plugin log files located at the same level of the Playnite executables (note the plugin!).
+Along with your detailed problem description, you may need to attach the plugin log files located at the same level of the Playnite executables (not the plugin folder!).
 
 The right log files are named:
 - extensions.log
