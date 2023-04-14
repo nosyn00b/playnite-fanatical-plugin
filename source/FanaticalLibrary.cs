@@ -191,7 +191,7 @@ namespace FanaticalLibrary
                         {
                             Name = "Open Fanatical Order",
                             Type = GameActionType.URL,
-                            Path = FanaticalAccountClient.orderUrl+"/"+SourceGameMetadata.order["_id"],
+                            Path = FanaticalAccountClient.orderUrl+"/"+SourceGameMetadata.order._id,
                             IsPlayAction = false
                         }
                     },
