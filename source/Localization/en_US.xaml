@@ -15,7 +15,7 @@
     <sys:String x:Key="LOCPublicAccount">Public Account</sys:String>
     <sys:String x:Key="LOCAPIKey">API Key</sys:String>
     <!-- Fanatical-->
-    <sys:String x:Key="LOCImportAlsoRedeemed">Import even if redeeemed (not recommended)</sys:String>
+    <sys:String x:Key="LOCImportAlsoRedeemed">Import even if redeemed (not recommended)</sys:String>
     <sys:String x:Key="LOCImportAlsoDLC">Import also DLCs</sys:String>
     <sys:String x:Key="LOCImportAlsoAudio">Import also Audio Items</sys:String>
     <sys:String x:Key="LOCImportAlsoBooks">Import also Books Items</sys:String>
